@@ -12,10 +12,7 @@ from datetime import datetime, time, timedelta
 load_dotenv()
 OPENWEATHER_API = os.getenv("OPENWEATHER_API")
 
-
-# -----------------------
 # Current Weather
-# -----------------------
 def get_weather(city=None, zipcode=None, lat=None, lon=None):
     # Build query
     if city:
@@ -56,9 +53,8 @@ def get_weather(city=None, zipcode=None, lat=None, lon=None):
     return weather
 
 
-# -----------------------
+
 # 6-day Daily Forecast
-# -----------------------
 def get_forecast(city=None, zipcode=None, lat=None, lon=None):
     if city:
         url = f"http://api.openweathermap.org/data/2.5/forecast?q={city}&appid={OPENWEATHER_API}&units=metric"
@@ -99,9 +95,8 @@ def get_forecast(city=None, zipcode=None, lat=None, lon=None):
     return df_daily
 
 
-# -----------------------
 # Air Pollution (Current + 5 days)
-# -----------------------
+
 def get_air_pollution(lat, lon):
     url = f"http://api.openweathermap.org/data/2.5/air_pollution/forecast?lat={lat}&lon={lon}&appid={OPENWEATHER_API}"
     r = requests.get(url)
@@ -157,11 +152,6 @@ def plot_weather(forecast_df):
     return fig
 
 
-# -----------------------
-# Air Pollution Plot
-# -----------------------
-
-
 def plot_pollution(pollution_df):
     fig, ax = plt.subplots()
 
@@ -188,13 +178,7 @@ def plot_pollution(pollution_df):
     plt.xticks(rotation=45)
     plt.tight_layout()
     return fig
-
-
-# -----------------------
 # Report Generator (PDF)
-# -----------------------
-
-
 def generate_report(city, weather, forecast, pollution):
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer)
@@ -230,7 +214,7 @@ def generate_report(city, weather, forecast, pollution):
         )
         story.append(Spacer(1, 6))
 
-        # Ensure AQI and category columns exist
+        # Ensuring AQI and category columns exist
         if "aqi" not in pollution.columns:
             # Example fallback: use pm2_5 levels to estimate
             def estimate_aqi(pm2_5):
@@ -333,3 +317,4 @@ def parse_record_time(rt):
         return rt
     else:
         return datetime.now().time()
+
