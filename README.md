@@ -40,10 +40,15 @@ project structure
 
 weather-dashboard/
 │
+
 ├── app.py          # Main Streamlit application (frontend)
+
 ├── weather.py      # Weather data fetching, forecasting, and visualization
+
 ├── database.py     # Database class with CRUD operations
+
 ├── requirements.txt# Python dependencies
+
 └── README.md       # Project documentation
 
 Technologies Used
