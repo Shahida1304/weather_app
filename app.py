@@ -59,7 +59,7 @@ with col1:
 
 now = datetime.now()
 # Initialize database
-db = WeatherDB(user="root", password="root", database="weatherdb")
+db = WeatherDB()
 
 st.title("Search (city/lat,lon/zipcode)")
 # Input section
