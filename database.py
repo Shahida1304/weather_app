@@ -1,20 +1,22 @@
+import streamlit as st
 import mysql.connector
 from mysql.connector import Error
 from datetime import datetime, time, timedelta
 import os
+
 class WeatherDB:
     def __init__(
-        self, host=st.secrets["DB_HOST"], 
+        self, 
+        host=st.secrets["DB_HOST"], 
         user=st.secrets["DB_USER"], 
         password=st.secrets["DB_PASSWORD"], 
-        database=st.secrets["DB_NAME"]):
+        database=st.secrets["DB_NAME"]
+    ):
         self.host = host
         self.user = user
         self.password = password
         self.database = database
-            
-        
-    
+
         try:
             self.conn = mysql.connector.connect(
                 host=host, user=user, password=password, database=database
@@ -26,7 +28,6 @@ class WeatherDB:
 
     def add_record(self, location, weather, air_quality, record_time=None, date=None):
         try:
-            # Ensure record_time is string "HH:MM:SS"
             if record_time is None:
                 record_time = datetime.now().strftime("%H:%M:%S")
             elif isinstance(record_time, (datetime, time)):
@@ -39,22 +40,19 @@ class WeatherDB:
                 INSERT INTO history (location, weather, air_quality, record_time, date)
                 VALUES (%s, %s, %s, %s, %s)
             """
-            self.cursor.execute(
-                sql, (location, weather, air_quality, record_time, date)
-            )
+            self.cursor.execute(sql, (location, weather, air_quality, record_time, date))
             self.conn.commit()
             print("Record inserted successfully")
         except Error as e:
             print("Error inserting record:", e)
 
-    
     def get_records(self, location=None, start_date=None, end_date=None):
         try:
             query = "SELECT * FROM history WHERE 1=1"
             params = []
 
             if location:
-                query += " AND location = %s"
+                query += " AND location=%s"
                 params.append(location)
             if start_date:
                 query += " AND date >= %s"
@@ -80,16 +78,7 @@ class WeatherDB:
             print(f"Error reading records: {e}")
             return []
 
-
-    def update_record(
-        self,
-        record_id,
-        location=None,
-        weather=None,
-        air_quality=None,
-        record_time=None,
-        date=None,
-    ):
+    def update_record(self, record_id, location=None, weather=None, air_quality=None, record_time=None, date=None):
         try:
             fields = []
             values = []
@@ -123,7 +112,6 @@ class WeatherDB:
         except Exception as e:
             return f"Error updating record: {e}"
 
-
     def delete_record(self, record_id):
         try:
             self.cursor.execute("DELETE FROM history WHERE id=%s", (record_id,))
@@ -132,13 +120,14 @@ class WeatherDB:
         except Exception as e:
             return f"Error deleting record: {e}"
 
-    
     def close(self):
         if self.cursor:
             self.cursor.close()
         if self.conn:
             self.conn.close()
         print("MySQL connection closed")
+
+
 
 
 
