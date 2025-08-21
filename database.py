@@ -7,7 +7,7 @@ class WeatherDB:
         self, host=st.secrets["DB_HOST"], 
         user=st.secrets["DB_USER"], 
         password=st.secrets["DB_PASSWORD"], 
-        database=st.secrets["DB_NAME"]
+        database=st.secrets["DB_NAME"])
         self.host = host
         self.user = user
         self.password = password
@@ -137,6 +137,7 @@ class WeatherDB:
         if self.conn:
             self.conn.close()
         print("MySQL connection closed")
+
 
 
 
