@@ -2,16 +2,19 @@ import streamlit as st
 import mysql.connector
 from mysql.connector import Error
 from datetime import datetime, time, timedelta
-import os
 
 class WeatherDB:
-    def __init__(
-        self, 
-        host=st.secrets["DB_HOST"], 
-        user=st.secrets["DB_USER"], 
-        password=st.secrets["DB_PASSWORD"], 
-        database=st.secrets["DB_NAME"]
-    ):
+    def __init__(self, host=None, user=None, password=None, database=None):
+        # Use Streamlit secrets if parameters are not provided
+        if host is None:
+            host = st.secrets["DB_HOST"]
+        if user is None:
+            user = st.secrets["DB_USER"]
+        if password is None:
+            password = st.secrets["DB_PASSWORD"]
+        if database is None:
+            database = st.secrets["DB_NAME"]
+
         self.host = host
         self.user = user
         self.password = password
@@ -19,13 +22,14 @@ class WeatherDB:
 
         try:
             self.conn = mysql.connector.connect(
-                host=host, user=user, password=password, database=database
+                host=self.host, user=self.user, password=self.password, database=self.database
             )
             self.cursor = self.conn.cursor(dictionary=True)
             print("Connected to MySQL Database")
         except Error as e:
             print("Error connecting to database:", e)
 
+    # Add a new weather record
     def add_record(self, location, weather, air_quality, record_time=None, date=None):
         try:
             if record_time is None:
@@ -46,6 +50,7 @@ class WeatherDB:
         except Error as e:
             print("Error inserting record:", e)
 
+    # Fetch records with optional filters
     def get_records(self, location=None, start_date=None, end_date=None):
         try:
             query = "SELECT * FROM history WHERE 1=1"
@@ -65,6 +70,7 @@ class WeatherDB:
             self.cursor.execute(query, tuple(params))
             rows = self.cursor.fetchall()
 
+            # Convert timedelta record_time to HH:MM:SS
             for r in rows:
                 if isinstance(r["record_time"], timedelta):
                     total_seconds = int(r["record_time"].total_seconds())
@@ -78,6 +84,7 @@ class WeatherDB:
             print(f"Error reading records: {e}")
             return []
 
+    # Update existing record
     def update_record(self, record_id, location=None, weather=None, air_quality=None, record_time=None, date=None):
         try:
             fields = []
@@ -112,6 +119,7 @@ class WeatherDB:
         except Exception as e:
             return f"Error updating record: {e}"
 
+    # Delete a record
     def delete_record(self, record_id):
         try:
             self.cursor.execute("DELETE FROM history WHERE id=%s", (record_id,))
@@ -120,14 +128,13 @@ class WeatherDB:
         except Exception as e:
             return f"Error deleting record: {e}"
 
+    # Close database connection
     def close(self):
         if self.cursor:
             self.cursor.close()
         if self.conn:
             self.conn.close()
         print("MySQL connection closed")
-
-
 
 
 
