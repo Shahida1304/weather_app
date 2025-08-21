@@ -1,20 +1,28 @@
 import mysql.connector
 from mysql.connector import Error
 from datetime import datetime, time, timedelta
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 
 class WeatherDB:
     def __init__(
-        self, host="localhost", user="root", password="", database="weatherdb"
+        self, host=os.getenv("DB_HOST", "localhost"), 
+        user=os.getenv("DB_USER", "root"), 
+        password=os.getenv("DB_PASSWORD", ""), 
+        database=os.getenv("DB_NAME", "weatherdb")
     ):
         try:
             self.conn = mysql.connector.connect(
                 host=host, user=user, password=password, database=database
             )
             self.cursor = self.conn.cursor(dictionary=True)
-            print("✅ Connected to MySQL Database")
+            print("Connected to MySQL Database")
         except Error as e:
-            print("❌ Error connecting to database:", e)
+            print("Error connecting to database:", e)
 
     def add_record(self, location, weather, air_quality, record_time=None, date=None):
         try:
@@ -35,12 +43,11 @@ class WeatherDB:
                 sql, (location, weather, air_quality, record_time, date)
             )
             self.conn.commit()
-            print("✅ Record inserted successfully")
+            print("Record inserted successfully")
         except Error as e:
-            print("❌ Error inserting record:", e)
+            print("Error inserting record:", e)
 
-    # ---------------- READ ----------------
-    # ---------------- READ ----------------
+    
     def get_records(self, location=None, start_date=None, end_date=None):
         try:
             query = "SELECT * FROM history WHERE 1=1"
@@ -70,10 +77,10 @@ class WeatherDB:
 
             return rows
         except Exception as e:
-            print(f"❌ Error reading records: {e}")
+            print(f"Error reading records: {e}")
             return []
 
-    # ---------------- UPDATE ----------------
+
     def update_record(
         self,
         record_id,
@@ -106,29 +113,30 @@ class WeatherDB:
                 values.append(date)
 
             if not fields:
-                return "⚠ Nothing to update"
+                return "Nothing to update"
 
             query = f"UPDATE history SET {', '.join(fields)} WHERE id=%s"
             values.append(record_id)
             self.cursor.execute(query, tuple(values))
             self.conn.commit()
-            return f"✅ Record {record_id} updated"
+            return f"Record {record_id} updated"
         except Exception as e:
-            return f"❌ Error updating record: {e}"
+            return f"Error updating record: {e}"
 
-    # ---------------- DELETE ----------------
+
     def delete_record(self, record_id):
         try:
             self.cursor.execute("DELETE FROM history WHERE id=%s", (record_id,))
             self.conn.commit()
-            return f"✅ Record {record_id} deleted"
+            return f"Record {record_id} deleted"
         except Exception as e:
-            return f"❌ Error deleting record: {e}"
+            return f"Error deleting record: {e}"
 
-    # ---------------- CLOSE ----------------
+    
     def close(self):
         if self.cursor:
             self.cursor.close()
         if self.conn:
             self.conn.close()
-        print("✅ MySQL connection closed")
+        print("MySQL connection closed")
+
