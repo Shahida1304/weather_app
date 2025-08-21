@@ -10,10 +10,10 @@ load_dotenv()
 
 class WeatherDB:
     def __init__(
-        self, host=os.getenv("DB_HOST", "localhost"), 
-        user=os.getenv("DB_USER", "root"), 
-        password=os.getenv("DB_PASSWORD", ""), 
-        database=os.getenv("DB_NAME", "weatherdb")
+        self, host=st.secrets("DB_HOST", "localhost"), 
+        user=st.secrets("DB_USER", "root"), 
+        password=st.secrets("DB_PASSWORD", ""), 
+        database=st.secrets("DB_NAME", "weatherdb")
     ):
         try:
             self.conn = mysql.connector.connect(
@@ -139,4 +139,5 @@ class WeatherDB:
         if self.conn:
             self.conn.close()
         print("MySQL connection closed")
+
 
