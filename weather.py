@@ -10,7 +10,7 @@ from datetime import datetime, time, timedelta
 
 # Load API key
 load_dotenv()
-OPENWEATHER_API = os.getenv("OPENWEATHER_API")
+OPENWEATHER_API = st.secrets("OPENWEATHER_API")
 
 # Current Weather
 def get_weather(city=None, zipcode=None, lat=None, lon=None):
@@ -317,4 +317,5 @@ def parse_record_time(rt):
         return rt
     else:
         return datetime.now().time()
+
 
