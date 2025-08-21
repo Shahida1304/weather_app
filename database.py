@@ -2,12 +2,6 @@ import mysql.connector
 from mysql.connector import Error
 from datetime import datetime, time, timedelta
 import os
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
-
-
 class WeatherDB:
     def __init__(
         self, host=st.secrets("DB_HOST", "localhost"), 
@@ -139,5 +133,6 @@ class WeatherDB:
         if self.conn:
             self.conn.close()
         print("MySQL connection closed")
+
 
 
