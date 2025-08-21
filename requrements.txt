@@ -1,1 +1,7 @@
-sqlalchemy
+streamlit
+mysql-connector-python
+requests
+matplotlib
+pandas
+reportlab
+python-dotenv
