@@ -1,42 +1,42 @@
 Weather Dashboard Project
 
-Overview
+1)Overview
 
 This project is a Weather Dashboard Application built using Python, Streamlit, and a weather API. The application allows users to check current weather, 5-day forecasts, and air pollution details for any city. It also stores and retrieves weather queries in a database, making it easy to track historical searches.
 
 The goal of this project is to create a user-friendly, interactive platform for accessing real-time weather data, while also demonstrating integration of APIs, database handling, and visualization in a single project.
 
-Features
+2)Features
 
-Real-time Weather Data
+-Real-time Weather Data
 
 Displays current temperature, humidity, wind speed, and weather conditions.
 
-Weather Forecast
+-Weather Forecast
 
 Shows a multi-day forecast with detailed weather information.
 
-Air Pollution Monitoring
+-Air Pollution Monitoring
 
 Provides air quality index (AQI) data along with pollutant levels.
 
-Data Visualization
+-Data Visualization
 
 Generates charts and plots for weather and pollution trends.
 
-Database Integration
+-Database Integration
 
 Saves user queries (city name, time, and results) into a database.
 
-Allows CRUD operations (Create, Read, Update, Delete) on weather history.
+-Allows CRUD operations (Create, Read, Update, Delete) on weather history.
 
-Interactive Dashboard
+-Interactive Dashboard
 
 Simple and intuitive interface using Streamlit.
 
 Users can search for cities, visualize results, and view past history.
 
-project structure
+3)project structure
 
 weather-dashboard/
 │
@@ -51,7 +51,7 @@ weather-dashboard/
 
 └── README.md       # Project documentation
 
-Technologies Used
+4)Technologies Used
 
 Python 3.x
 
@@ -64,7 +64,7 @@ Matplotlib (for data visualization)
 MySQL (for database handling)
 
 
-How It Works
+5)How It Works
 
 The user enters a city name in the dashboard.
 
