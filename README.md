@@ -8,9 +8,15 @@ The goal of this project is to create a user-friendly, interactive platform for 
 
 **Features**
 
--Real-time Weather Data
+-Shows current user location weather
+
+-suggests a useful tip based on current conditions
+
+-Real-time Weather Data for user search
 
 Displays current temperature, humidity, wind speed, and weather conditions.
+
+-Redirects to a YouTube video based on your search query
 
 -Weather Forecast
 
@@ -26,7 +32,7 @@ Generates charts and plots for weather and pollution trends.
 
 -Database Integration
 
-Saves user queries (city name, time, and results) into a database.
+Saves user queries (city name, time, and results) weather history into a database.
 
 -Allows CRUD operations (Create, Read, Update, Delete) on weather history.
 
@@ -35,6 +41,8 @@ Saves user queries (city name, time, and results) into a database.
 Simple and intuitive interface using Streamlit.
 
 Users can search for cities, visualize results, and view past history.
+
+-Lets you download weather reports (PDF)
 
 **project structure**
 
@@ -50,6 +58,8 @@ weather_app/
 ├── requirements.txt# Python dependencies
 
 └── README.md       # Project documentation
+
+.env # API keys and Database credentials
 
 **Technologies Used**
 
@@ -77,6 +87,27 @@ MySQL (for database handling)
 -Users can view, edit, or delete stored weather queries.
 
 
+
+**Installation & Setup**
+
+1)Install dependencies
+
+>pip install -r requirements.txt
+
+2) Create a .env file in the root folder
+
+OPENWEATHER_API_KEY=your_openweather_key
+
+DB_USER=root
+
+DB_PASSWORD=root
+
+DB_NAME=weatherdb
+
 **Future Enhancements**
 
 -Add user authentication for personalized dashboards.
+
+-More visual charts for weather data
+
+-Support for multiple languages
