@@ -1,0 +1,6 @@
+streamlit
+matplotlib
+pandas
+requests
+reportlab
+mysql-connector-python
