@@ -1,3 +1,4 @@
+import streamlit as st
 import os
 import requests
 import pandas as pd
@@ -8,7 +9,7 @@ from io import BytesIO
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table
 from reportlab.lib.styles import getSampleStyleSheet
 from datetime import datetime, time, timedelta
-OPENWEATHER_API = st.secrets("OPENWEATHER_API")
+OPENWEATHER_API = st.secrets["OPENWEATHER_API"]
 # Current Weather
 def get_weather(city=None, zipcode=None, lat=None, lon=None):
     # Build query
@@ -314,6 +315,7 @@ def parse_record_time(rt):
         return rt
     else:
         return datetime.now().time()
+
 
 
 
