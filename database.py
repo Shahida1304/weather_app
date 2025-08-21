@@ -4,10 +4,14 @@ from datetime import datetime, time, timedelta
 import os
 class WeatherDB:
     def __init__(
-        self, host=st.secrets("DB_HOST", "localhost"), 
-        user=st.secrets("DB_USER", "root"), 
-        password=st.secrets("DB_PASSWORD", ""), 
-        database=st.secrets("DB_NAME", "weatherdb")
+        self, host=st.secrets["DB_HOST", "localhost"], 
+        user=st.secrets["DB_USER", "root"], 
+        password=st.secrets["DB_PASSWORD"], 
+        database=st.secrets["DB_NAME"]
+        self.host = host
+        self.user = user
+        self.password = password
+        self.database = database
     ):
         try:
             self.conn = mysql.connector.connect(
@@ -133,6 +137,7 @@ class WeatherDB:
         if self.conn:
             self.conn.close()
         print("MySQL connection closed")
+
 
 
 
