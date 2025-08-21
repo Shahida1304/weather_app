@@ -165,7 +165,7 @@ if st.button("Search"):
         )
 
     else:
-        st.error("❌ Location not found. Try again!")
+        st.error("Location not found. Try again!")
 
 menu = ["Add Record", "View Records", "Update Record", "Delete Record"]
 choice = st.sidebar.selectbox("Menu", menu)
@@ -187,7 +187,7 @@ if choice == "Add Record":
             record_time=time_val,
             date=date_val,
         )
-        st.success("✅ Record added successfully!")
+        st.success("Record added successfully!")
 
 # 📖 View Records
 elif choice == "View Records":
@@ -226,7 +226,7 @@ elif choice == "Update Record":
                 record_time=time_input,
                 date=date_input,
             )
-            st.success("✅ Record updated successfully!")
+            st.success("Record updated successfully!")
 
 # 🗑️ Delete Record
 elif choice == "Delete Record":
@@ -240,7 +240,7 @@ elif choice == "Delete Record":
 
         if st.button("Delete Record"):
             db.delete_record(record["id"])
-            st.success("🗑️ Record deleted successfully!")
+            st.success("Record deleted successfully!")
 # Initialize session state
 if "show_info" not in st.session_state:
     st.session_state.show_info = False
