@@ -1,6 +1,8 @@
 import os
 import requests
 import pandas as pd
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from io import BytesIO
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table
@@ -312,6 +314,7 @@ def parse_record_time(rt):
         return rt
     else:
         return datetime.now().time()
+
 
 
 
