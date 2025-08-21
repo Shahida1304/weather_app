@@ -5,40 +5,38 @@ from datetime import datetime, time, timedelta
 
 class WeatherDB:
     def __init__(self, host=None, user=None, password=None, database=None):
-        # Use Streamlit secrets if parameters are not provided
-        if host is None:
-            host = st.secrets["DB_HOST"]
-        if user is None:
-            user = st.secrets["DB_USER"]
-        if password is None:
-            password = st.secrets["DB_PASSWORD"]
-        if database is None:
-            database = st.secrets["DB_NAME"]
+        # Load secrets if parameters are not provided
+        host = host or st.secrets.get("DB_HOST")
+        user = user or st.secrets.get("DB_USER")
+        password = password or st.secrets.get("DB_PASSWORD")
+        database = database or st.secrets.get("DB_NAME")
 
-        self.host = host
-        self.user = user
-        self.password = password
-        self.database = database
+        self.conn = None
+        self.cursor = None
 
         try:
             self.conn = mysql.connector.connect(
-                host=self.host, user=self.user, password=self.password, database=self.database
+                host=host,
+                user=user,
+                password=password,
+                database=database
             )
             self.cursor = self.conn.cursor(dictionary=True)
-            print("Connected to MySQL Database")
+            st.success("Connected to MySQL Database")
         except Error as e:
-            print("Error connecting to database:", e)
+            st.error(f"Could not connect to MySQL database: {e}")
+            # Optional: raise RuntimeError(e) if you want the app to stop
+            self.conn = None
+            self.cursor = None
 
-    # Add a new weather record
     def add_record(self, location, weather, air_quality, record_time=None, date=None):
+        if not self.cursor:
+            return "Cannot add record: no database connection."
         try:
-            if record_time is None:
-                record_time = datetime.now().strftime("%H:%M:%S")
-            elif isinstance(record_time, (datetime, time)):
+            record_time = record_time or datetime.now().strftime("%H:%M:%S")
+            if isinstance(record_time, (datetime, time)):
                 record_time = record_time.strftime("%H:%M:%S")
-
-            if date is None:
-                date = datetime.now().date()
+            date = date or datetime.now().date()
 
             sql = """
                 INSERT INTO history (location, weather, air_quality, record_time, date)
@@ -46,12 +44,13 @@ class WeatherDB:
             """
             self.cursor.execute(sql, (location, weather, air_quality, record_time, date))
             self.conn.commit()
-            print("Record inserted successfully")
+            return "Record inserted successfully"
         except Error as e:
-            print("Error inserting record:", e)
+            return f"Error inserting record: {e}"
 
-    # Fetch records with optional filters
     def get_records(self, location=None, start_date=None, end_date=None):
+        if not self.cursor:
+            return []
         try:
             query = "SELECT * FROM history WHERE 1=1"
             params = []
@@ -70,7 +69,6 @@ class WeatherDB:
             self.cursor.execute(query, tuple(params))
             rows = self.cursor.fetchall()
 
-            # Convert timedelta record_time to HH:MM:SS
             for r in rows:
                 if isinstance(r["record_time"], timedelta):
                     total_seconds = int(r["record_time"].total_seconds())
@@ -81,11 +79,12 @@ class WeatherDB:
 
             return rows
         except Exception as e:
-            print(f"Error reading records: {e}")
+            st.error(f"Error reading records: {e}")
             return []
 
-    # Update existing record
     def update_record(self, record_id, location=None, weather=None, air_quality=None, record_time=None, date=None):
+        if not self.cursor:
+            return "Cannot update record: no database connection."
         try:
             fields = []
             values = []
@@ -119,8 +118,9 @@ class WeatherDB:
         except Exception as e:
             return f"Error updating record: {e}"
 
-    # Delete a record
     def delete_record(self, record_id):
+        if not self.cursor:
+            return "Cannot delete record: no database connection."
         try:
             self.cursor.execute("DELETE FROM history WHERE id=%s", (record_id,))
             self.conn.commit()
@@ -128,18 +128,9 @@ class WeatherDB:
         except Exception as e:
             return f"Error deleting record: {e}"
 
-    # Close database connection
     def close(self):
         if self.cursor:
             self.cursor.close()
         if self.conn:
             self.conn.close()
-        print("MySQL connection closed")
-
-
-
-
-
-
-
-
+        st.info("MySQL connection closed")
