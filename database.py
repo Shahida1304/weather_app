@@ -19,7 +19,10 @@ class WeatherDB:
                 host=host,
                 user=user,
                 password=password,
-                database=database
+                database=database, 
+                port=3306,
+                ssl_ca="certs/ca.pem",      # path to downloaded ca.pem
+                ssl_verify_cert=True
             )
             self.cursor = self.conn.cursor(dictionary=True)
             st.success("Connected to MySQL Database")
@@ -158,3 +161,4 @@ class WeatherDB:
         if self.conn:
             self.conn.close()
         st.info("MySQL connection closed")
+
