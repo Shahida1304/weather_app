@@ -29,6 +29,33 @@ class WeatherDB:
             self.conn = None
             self.cursor = None
 
+
+    self.create_table_if_not_exists()
+        except Error as e:
+            st.error(f"Could not connect to MySQL database: {e}")
+            self.conn = None
+            self.cursor = None
+
+    def create_table_if_not_exists(self):
+        if not self.cursor:
+            return
+        try:
+            create_table_query = """
+            CREATE TABLE IF NOT EXISTS history (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                location VARCHAR(255),
+                temperature VARCHAR(50),
+                air_quality VARCHAR(50),
+                record_time TIME,
+                date DATETIME
+            )
+            """
+            self.cursor.execute(create_table_query)
+            self.conn.commit()
+            st.info("Table 'history' ensured to exist")
+        except Error as e:
+            st.error(f"Error creating table: {e}")
+
     def add_record(self, location, weather, air_quality, record_time=None, date=None):
         if not self.cursor:
             return "Cannot add record: no database connection."
@@ -134,3 +161,4 @@ class WeatherDB:
         if self.conn:
             self.conn.close()
         st.info("MySQL connection closed")
+
