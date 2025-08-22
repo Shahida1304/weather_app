@@ -181,16 +181,16 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 
+
 def generate_report(city, weather, forecast, pollution):
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4)
     styles = getSampleStyleSheet()
 
-    # Custom styles
     title_style = ParagraphStyle(
         "TitleStyle",
         parent=styles["Title"],
-        alignment=1,  # center
+        alignment=1,
         textColor=colors.HexColor("#004080")
     )
     section_style = ParagraphStyle(
@@ -201,23 +201,22 @@ def generate_report(city, weather, forecast, pollution):
 
     story = []
 
-    # Title
     story.append(Paragraph(f"🌍 Weather Report for {city}", title_style))
     story.append(Spacer(1, 20))
 
-    # Current weather
     story.append(Paragraph("🌤 Current Weather", section_style))
     story.append(Spacer(1, 8))
-    story.append(Paragraph(f"<b>Temperature:</b> {weather['temp']} °C", styles["Normal"]))
+    story.append(Paragraph(f"<b>Temperature:</b> {weather['temp']:.2f} °C", styles["Normal"]))
     story.append(Paragraph(f"<b>Condition:</b> {weather['weather']}", styles["Normal"]))
-    story.append(Paragraph(f"<b>Coordinates:</b> {weather['lat']}, {weather['lon']}", styles["Normal"]))
+    story.append(Paragraph(f"<b>Coordinates:</b> {weather['lat']:.2f}, {weather['lon']:.2f}", styles["Normal"]))
     story.append(Spacer(1, 16))
 
-    # Forecast
     if forecast is not None:
         story.append(Paragraph("📊 5-Day Forecast", section_style))
         story.append(Spacer(1, 8))
-        forecast_data = [forecast.columns.tolist()] + forecast.values.tolist()
+        forecast_data = [forecast.columns.tolist()] + [
+            [f"{v:.2f}" if isinstance(v, float) else v for v in row] for row in forecast.values.tolist()
+        ]
         forecast_table = Table(forecast_data, hAlign="LEFT")
         forecast_table.setStyle(TableStyle([
             ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#CCE5FF")),
@@ -231,12 +230,12 @@ def generate_report(city, weather, forecast, pollution):
         story.append(forecast_table)
         story.append(Spacer(1, 16))
 
-    # Pollution
     if pollution is not None:
         story.append(Paragraph("💨 Air Pollution Forecast (5 Days)", section_style))
         story.append(Spacer(1, 8))
-
-        pollution_data = [pollution.columns.tolist()] + pollution.values.tolist()
+        pollution_data = [pollution.columns.tolist()] + [
+            [f"{v:.2f}" if isinstance(v, float) else v for v in row] for row in pollution.values.tolist()
+        ]
         pollution_table = Table(pollution_data, hAlign="LEFT")
         pollution_table.setStyle(TableStyle([
             ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#FFDDCC")),
@@ -250,10 +249,10 @@ def generate_report(city, weather, forecast, pollution):
         story.append(pollution_table)
         story.append(Spacer(1, 16))
 
-    # Build document
     doc.build(story)
     buffer.seek(0)
     return buffer
+
 
 def get_user_location():
     """Get user's approximate location using IP address"""
@@ -327,6 +326,7 @@ def parse_record_time(rt):
         return rt
     else:
         return datetime.now().time()
+
 
 
 
