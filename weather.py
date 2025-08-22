@@ -6,8 +6,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from io import BytesIO
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table
-from reportlab.lib.styles import getSampleStyleSheet
+
 from datetime import datetime, time, timedelta
 OPENWEATHER_API = st.secrets["OPENWEATHER_API"]
 # Current Weather
@@ -177,70 +176,84 @@ def plot_pollution(pollution_df):
     plt.tight_layout()
     return fig
 # Report Generator (PDF)
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib import colors
+
 def generate_report(city, weather, forecast, pollution):
     buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer)
+    doc = SimpleDocTemplate(buffer, pagesize=A4)
     styles = getSampleStyleSheet()
+
+    # Custom styles
+    title_style = ParagraphStyle(
+        "TitleStyle",
+        parent=styles["Title"],
+        alignment=1,  # center
+        textColor=colors.HexColor("#004080")
+    )
+    section_style = ParagraphStyle(
+        "SectionStyle",
+        parent=styles["Heading2"],
+        textColor=colors.HexColor("#006699")
+    )
+
     story = []
 
     # Title
-    story.append(Paragraph(f"Weather Report for {city}", styles["Title"]))
-    story.append(Spacer(1, 12))
+    story.append(Paragraph(f"🌍 Weather Report for {city}", title_style))
+    story.append(Spacer(1, 20))
 
     # Current weather
-    story.append(Paragraph("🌤 Current Weather", styles["Heading2"]))
-    story.append(Spacer(1, 6))
-    story.append(Paragraph(f"Temperature: {weather['temp']} °C", styles["Normal"]))
-    story.append(Paragraph(f"Condition: {weather['weather']}", styles["Normal"]))
-    story.append(
-        Paragraph(f"Coordinates: {weather['lat']}, {weather['lon']}", styles["Normal"])
-    )
-    story.append(Spacer(1, 12))
+    story.append(Paragraph("🌤 Current Weather", section_style))
+    story.append(Spacer(1, 8))
+    story.append(Paragraph(f"<b>Temperature:</b> {weather['temp']} °C", styles["Normal"]))
+    story.append(Paragraph(f"<b>Condition:</b> {weather['weather']}", styles["Normal"]))
+    story.append(Paragraph(f"<b>Coordinates:</b> {weather['lat']}, {weather['lon']}", styles["Normal"]))
+    story.append(Spacer(1, 16))
 
-    # 5-day forecast
+    # Forecast
     if forecast is not None:
-        story.append(Paragraph("📊 5-Day Forecast", styles["Heading2"]))
-        story.append(Spacer(1, 6))
-        story.append(Table([forecast.columns.tolist()] + forecast.values.tolist()))
+        story.append(Paragraph("📊 5-Day Forecast", section_style))
+        story.append(Spacer(1, 8))
+        forecast_data = [forecast.columns.tolist()] + forecast.values.tolist()
+        forecast_table = Table(forecast_data, hAlign="LEFT")
+        forecast_table.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#CCE5FF")),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.black),
+            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+            ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.whitesmoke, colors.lightgrey]),
+            ("FONTSIZE", (0, 0), (-1, -1), 9),
+            ("PADDING", (0, 0), (-1, -1), 6),
+        ]))
+        story.append(forecast_table)
+        story.append(Spacer(1, 16))
 
-    story.append(Spacer(1, 12))
-
-    # Air Pollution (with AQI categories)
+    # Pollution
     if pollution is not None:
-        story.append(
-            Paragraph("💨 Air Pollution Forecast (5 Days)", styles["Heading2"])
-        )
-        story.append(Spacer(1, 6))
+        story.append(Paragraph("💨 Air Pollution Forecast (5 Days)", section_style))
+        story.append(Spacer(1, 8))
 
-        # Ensuring AQI and category columns exist
-        if "aqi" not in pollution.columns:
-            # Example fallback: use pm2_5 levels to estimate
-            def estimate_aqi(pm2_5):
-                if pm2_5 <= 12:
-                    return 1
-                if pm2_5 <= 35:
-                    return 2
-                if pm2_5 <= 55:
-                    return 3
-                if pm2_5 <= 150:
-                    return 4
-                return 5
+        pollution_data = [pollution.columns.tolist()] + pollution.values.tolist()
+        pollution_table = Table(pollution_data, hAlign="LEFT")
+        pollution_table.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#FFDDCC")),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.black),
+            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+            ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.whitesmoke, colors.lavender]),
+            ("FONTSIZE", (0, 0), (-1, -1), 9),
+            ("PADDING", (0, 0), (-1, -1), 6),
+        ]))
+        story.append(pollution_table)
+        story.append(Spacer(1, 16))
 
-            pollution["aqi"] = pollution["pm2_5"].apply(estimate_aqi)
-
-        def label(aqi):
-            return {1: "Good", 2: "Fair", 3: "Moderate", 4: "Poor", 5: "Very Poor"}.get(
-                aqi, "Unknown"
-            )
-
-        pollution["AQI_Category"] = pollution["aqi"].apply(label)
-
-        story.append(Table([pollution.columns.tolist()] + pollution.values.tolist()))
-
+    # Build document
     doc.build(story)
     buffer.seek(0)
     return buffer
-
 
 def get_user_location():
     """Get user's approximate location using IP address"""
@@ -252,9 +265,7 @@ def get_user_location():
         return None, None
 
 
-def get_current_weather(lat, lon):
-    """
-    Fetches the current weather for given latitude and longitude using OpenWeatherMap API.
+def get_current_weather(lat, loFetches the current weather for given latitude and longitude using OpenWeatherMap API.
     """
     url = f"http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={OPENWEATHER_API}&units=metric"
     response = requests.get(url)
@@ -315,6 +326,7 @@ def parse_record_time(rt):
         return rt
     else:
         return datetime.now().time()
+
 
 
 
