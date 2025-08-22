@@ -265,8 +265,9 @@ def get_user_location():
         return None, None
 
 
-def get_current_weather(lat, loFetches the current weather for given latitude and longitude using OpenWeatherMap API.
-    """
+def get_current_weather(lat, lon):
+    """Fetches the current weather for given latitude and longitude using OpenWeatherMap API."""
+    
     url = f"http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={OPENWEATHER_API}&units=metric"
     response = requests.get(url)
 
@@ -326,6 +327,7 @@ def parse_record_time(rt):
         return rt
     else:
         return datetime.now().time()
+
 
 
 
