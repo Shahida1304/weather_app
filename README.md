@@ -98,11 +98,12 @@ MySQL (for database handling)
 
 OPENWEATHER_API_KEY=your_openweather_key
 
-DB_USER=root
+DB_USER=your_db_user
 
-DB_PASSWORD=root
+DB_PASSWORD=your_db_password
 
-DB_NAME=weatherdb
+DB_NAME=your_db_name
+
 
 **Future Enhancements**
 
