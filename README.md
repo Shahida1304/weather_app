@@ -1,114 +1,203 @@
-****Weather Dashboard Project****
+#  Weather & Air Quality Dashboard
 
-**Overview**
 
-This project is a Weather Dashboard Application built using Python, Streamlit, and a weather API. The application allows users to check current weather, 5-day forecasts, and air pollution details for any city. It also stores and retrieves weather queries in a database, making it easy to track historical searches.
+The **Weather & Air Quality Dashboard** is a full-stack data application built using **Python, Streamlit, and MySQL**.
+It allows users to view **real-time weather**, **multi-day forecasts**, and **air quality information** for any location, while also maintaining a **search history database** with complete CRUD operations.
 
-The goal of this project is to create a user-friendly, interactive platform for accessing real-time weather data, while also demonstrating integration of APIs, database handling, and visualization in a single project.
+This project demonstrates **API integration, data visualization, database design, and interactive UI development** in a single, cohesive application.
 
-**Features**
+---
 
--Shows current user location weather
+##  Key Features
 
--suggests a useful tip based on current conditions
+*  **Automatic Location Detection**
+  Fetches current weather based on user’s approximate location (IP-based).
 
--Real-time Weather Data for user search
+*  **Flexible Search**
+  Search weather using:
 
-Displays current temperature, humidity, wind speed, and weather conditions.
+  * City name
+  * Zip code
+  * Latitude & Longitude
 
--Redirects to a YouTube video based on your search query
+*  **Current Weather Details**
 
--Weather Forecast
+  * Temperature
+  * Humidity
+  * Wind speed
+  * Weather condition
 
-Shows a multi-day forecast with detailed weather information.
+*  **Smart Weather Tips**
 
--Air Pollution Monitoring
+  * Context-aware suggestions based on temperature and conditions.
 
-Provides air quality index (AQI) data along with pollutant levels.
+*  **6-Day Weather Forecast**
 
--Data Visualization
+  * Daily average temperature
+  * Most frequent weather condition
 
-Generates charts and plots for weather and pollution trends.
+*  **Air Quality Monitoring**
 
--Database Integration
+  * 5-day AQI forecast
+  * Pollutants: PM2.5, PM10, NO₂, SO₂, O₃, CO
 
-Saves user queries (city name, time, and results) weather history into a database.
+*  **Data Visualization**
 
--Allows CRUD operations (Create, Read, Update, Delete) on weather history.
+  * Line charts for weather trends
+  * AQI trend visualization
 
--Interactive Dashboard
+*  **Database Integration (MySQL)**
 
-Simple and intuitive interface using Streamlit.
+  * Stores weather search history
+  * Supports full CRUD operations:
 
-Users can search for cities, visualize results, and view past history.
+    * Add
+    * View
+    * Update
+    * Delete
 
--Lets you download weather reports (PDF)
+*  **PDF Weather Report**
 
-**project structure**
+  * Downloadable weather and air quality report.
 
+* ▶ **YouTube Weather Redirect**
+
+  * Opens weather-related videos for searched locations.
+
+---
+
+##  Project Structure
+
+```
 weather_app/
 │
+├── app.py              # Main Streamlit application (UI & logic)
+├── weather.py          # Weather APIs, forecasting, plots, report generation
+├── database.py         # MySQL database connection & CRUD operations
+├── requirements.txt    # Project dependencies
+├── README.md           # Documentation
+├── .env (optional)     # Local environment variables
+└── .gitignore
+```
 
-├── app.py          # Main Streamlit application (frontend)
+---
 
-├── weather.py      # Weather data fetching, forecasting, and visualization
+##  Technologies Used
 
-├── database.py     # Database class with CRUD operations
+* **Python 3.x**
+* **Streamlit** – Interactive web dashboard
+* **OpenWeatherMap API** – Weather & air pollution data
+* **MySQL** – Local database storage
+* **Pandas** – Data processing
+* **Matplotlib** – Data visualization
+* **ReportLab** – PDF generation
+* **Requests** – API calls
 
-├── requirements.txt# Python dependencies
+---
 
-└── README.md       # Project documentation
+##  How the Application Works
 
-.env # API keys and Database credentials
+1. User opens the Streamlit dashboard.
+2. The app detects the user’s location and displays current weather.
+3. User searches a location manually (city/zip/lat-lon).
+4. Weather, forecast, and air quality data are fetched via APIs.
+5. Results are visualized using charts.
+6. Search details are stored in a MySQL database.
+7. User can view, update, or delete previous records.
+8. Weather report can be downloaded as a PDF.
 
-**Technologies Used**
+---
 
-Python 3.x
+##  Database Setup (Local MySQL)
 
-Streamlit (for dashboard UI)
+This project uses a **local MySQL database** to ensure **easy reproducibility** for anyone cloning the repository.
 
-Requests (for API calls)
+### 1️ Create Database
 
-Matplotlib (for data visualization)
+```sql
+CREATE DATABASE weather_db;
+```
 
-MySQL (for database handling)
+No need to manually create tables — they are auto-generated by the app.
+
+---
+
+### 2️ (Optional) Configure Environment Variables
+
+Create a `.env` file in the project root:
+
+```
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=your_mysql_password
+DB_NAME=weather_db
+OPENWEATHER_API=your_openweather_api_key
+```
+
+If `.env` is not provided, the app defaults to:
+
+* Host: `localhost`
+* User: `root`
+* Password: *(empty)*
+* Database: `weather_db`
+
+---
+
+##  Installation & Setup
+
+### 1️ Clone the Repository
+
+```bash
+git clone https://github.com/Shahida1304/weather_app.git
+cd weather_app
+```
+
+---
+
+### 2️ Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+### 3️ Run the Application
+
+```bash
+streamlit run app.py
+```
+
+---
+
+##  Security & Design Notes
+
+* No database credentials are hardcoded.
+* `.env` and SSL certificates are excluded via `.gitignore`.
+* Local-first database design improves portability.
+* Database layer is **cloud-ready** and can be migrated to AWS RDS or managed SQL services with minimal changes.
+
+---
+
+##  Future Enhancements
+
+* User authentication & profiles
+* Cloud database support (AWS RDS / Railway / PlanetScale)
+* Caching API responses for performance
+* Multi-language UI support
+* Enhanced weather analytics dashboards
+
+---
+
+## 👩‍💻 Author
+
+**Shaik Shahida**
+Final-Year Engineering Student
+Interested in **AI, Data Science, Cloud & Full-Stack Development**
+
+---
 
 
-**How It Works**
+This project is intentionally designed with a **local-first database setup** to allow easy execution on any system.
+The database layer is modular and can be extended to cloud environments for production use.
 
--The user enters a city name in the dashboard.
-
--The app fetches current weather, forecast, and pollution data using APIs.
-
--Data is displayed in a clean and interactive format.
-
--Queries are stored in a database for history tracking.
-
--Users can view, edit, or delete stored weather queries.
-
-
-
-**Installation & Setup**
-
-1)Install dependencies
-
->pip install -r requirements.txt
-
-2) Create a .env file in the root folder
-
-OPENWEATHER_API_KEY=your_openweather_key
-
-DB_USER=your_db_user
-
-DB_PASSWORD=your_db_password
-
-DB_NAME=your_db_name
-
-
-**Future Enhancements**
-
--Add user authentication for personalized dashboards.
-
--More visual charts for weather data
-
--Support for multiple languages
