@@ -2,14 +2,16 @@ import streamlit as st
 import mysql.connector
 from mysql.connector import Error
 from datetime import datetime, time, timedelta
+import os
 
 class WeatherDB:
     def __init__(self, host=None, user=None, password=None, database=None):
-        # Load secrets if parameters are not provided
-        host = host or st.secrets.get("DB_HOST")
-        user = user or st.secrets.get("DB_USER")
-        password = password or st.secrets.get("DB_PASSWORD")
-        database = database or st.secrets.get("DB_NAME")
+
+        # Local-first configuration
+        host = host or os.getenv("DB_HOST", "localhost")
+        user = user or os.getenv("DB_USER", "root")
+        password = password or os.getenv("DB_PASSWORD", "")
+        database = database or os.getenv("DB_NAME", "weather_db")
 
         self.conn = None
         self.cursor = None
@@ -19,146 +21,76 @@ class WeatherDB:
                 host=host,
                 user=user,
                 password=password,
-                database=database, 
-                port=3306,
-                ssl_ca="certs/ca.pem",      # path to downloaded ca.pem
-                ssl_verify_cert=True
+                database=database,
+                port=3306
             )
             self.cursor = self.conn.cursor(dictionary=True)
-            st.success("Connected to MySQL Database")
+            st.success("✅ Connected to local MySQL database")
 
-            # Ensure table exists
             self.create_table_if_not_exists()
 
         except Error as e:
-            st.error(f"Could not connect to MySQL database: {e}")
-            self.conn = None
-            self.cursor = None
+            st.error(f"❌ Could not connect to MySQL: {e}")
 
     def create_table_if_not_exists(self):
-        if not self.cursor:
-            return
-        try:
-            create_table_query = """
-            CREATE TABLE IF NOT EXISTS history (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                location VARCHAR(255),
-                temperature VARCHAR(50),
-                air_quality VARCHAR(50),
-                record_time TIME,
-                date DATETIME
-            )
-            """
-            self.cursor.execute(create_table_query)
-            self.conn.commit()
-            st.info("Table 'history' ensured to exist")
-        except Error as e:
-            st.error(f"Error creating table: {e}")
+        query = """
+        CREATE TABLE IF NOT EXISTS history (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            location VARCHAR(255),
+            weather VARCHAR(100),
+            air_quality VARCHAR(50),
+            record_time TIME,
+            date DATETIME
+        )
+        """
+        self.cursor.execute(query)
+        self.conn.commit()
 
-    def add_record(self, location, temperature, air_quality, record_time=None, date=None):
-        if not self.cursor:
-            return "Cannot add record: no database connection."
-        try:
-            record_time = record_time or datetime.now().strftime("%H:%M:%S")
-            if isinstance(record_time, (datetime, time)):
-                record_time = record_time.strftime("%H:%M:%S")
-            date = date or datetime.now()
+    def add_record(self, location, weather, air_quality, record_time=None, date=None):
+        record_time = record_time or datetime.now().strftime("%H:%M:%S")
+        if isinstance(record_time, (datetime, time)):
+            record_time = record_time.strftime("%H:%M:%S")
 
-            sql = """
-                INSERT INTO history (location, temperature, air_quality, record_time, date)
-                VALUES (%s, %s, %s, %s, %s)
-            """
-            self.cursor.execute(sql, (location, temperature, air_quality, record_time, date))
-            self.conn.commit()
-            return "Record inserted successfully"
-        except Error as e:
-            return f"Error inserting record: {e}"
+        date = date or datetime.now()
 
-    def get_records(self, location=None, start_date=None, end_date=None):
-        if not self.cursor:
-            return []
-        try:
-            query = "SELECT * FROM history WHERE 1=1"
-            params = []
+        query = """
+        INSERT INTO history (location, weather, air_quality, record_time, date)
+        VALUES (%s, %s, %s, %s, %s)
+        """
+        self.cursor.execute(query, (location, weather, air_quality, record_time, date))
+        self.conn.commit()
 
-            if location:
-                query += " AND location=%s"
-                params.append(location)
-            if start_date:
-                query += " AND date >= %s"
-                params.append(start_date)
-            if end_date:
-                query += " AND date <= %s"
-                params.append(end_date)
+    def get_records(self):
+        self.cursor.execute(
+            "SELECT * FROM history ORDER BY date DESC, record_time DESC"
+        )
+        rows = self.cursor.fetchall()
 
-            query += " ORDER BY date DESC, record_time DESC"
-            self.cursor.execute(query, tuple(params))
-            rows = self.cursor.fetchall()
+        for r in rows:
+            if isinstance(r["record_time"], timedelta):
+                total_seconds = int(r["record_time"].total_seconds())
+                h = total_seconds // 3600
+                m = (total_seconds % 3600) // 60
+                s = total_seconds % 60
+                r["record_time"] = f"{h:02d}:{m:02d}:{s:02d}"
 
-            # Format TIME objects as string
-            for r in rows:
-                if isinstance(r["record_time"], timedelta):
-                    total_seconds = int(r["record_time"].total_seconds())
-                    hours = total_seconds // 3600
-                    minutes = (total_seconds % 3600) // 60
-                    seconds = total_seconds % 60
-                    r["record_time"] = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+        return rows
 
-            return rows
-        except Exception as e:
-            st.error(f"Error reading records: {e}")
-            return []
+    def update_record(self, record_id, location, weather, air_quality, record_time, date):
+        if isinstance(record_time, (datetime, time)):
+            record_time = record_time.strftime("%H:%M:%S")
 
-    def update_record(self, record_id, location=None, temperature=None, air_quality=None, record_time=None, date=None):
-        if not self.cursor:
-            return "Cannot update record: no database connection."
-        try:
-            fields = []
-            values = []
-
-            if location:
-                fields.append("location=%s")
-                values.append(location)
-            if temperature:
-                fields.append("temperature=%s")
-                values.append(temperature)
-            if air_quality:
-                fields.append("air_quality=%s")
-                values.append(air_quality)
-            if record_time:
-                if isinstance(record_time, (datetime, time)):
-                    record_time = record_time.strftime("%H:%M:%S")
-                fields.append("record_time=%s")
-                values.append(record_time)
-            if date:
-                fields.append("date=%s")
-                values.append(date)
-
-            if not fields:
-                return "Nothing to update"
-
-            query = f"UPDATE history SET {', '.join(fields)} WHERE id=%s"
-            values.append(record_id)
-            self.cursor.execute(query, tuple(values))
-            self.conn.commit()
-            return f"Record {record_id} updated successfully"
-        except Exception as e:
-            return f"Error updating record: {e}"
+        query = """
+        UPDATE history
+        SET location=%s, weather=%s, air_quality=%s, record_time=%s, date=%s
+        WHERE id=%s
+        """
+        self.cursor.execute(
+            query,
+            (location, weather, air_quality, record_time, date, record_id)
+        )
+        self.conn.commit()
 
     def delete_record(self, record_id):
-        if not self.cursor:
-            return "Cannot delete record: no database connection."
-        try:
-            self.cursor.execute("DELETE FROM history WHERE id=%s", (record_id,))
-            self.conn.commit()
-            return f"Record {record_id} deleted successfully"
-        except Exception as e:
-            return f"Error deleting record: {e}"
-
-    def close(self):
-        if self.cursor:
-            self.cursor.close()
-        if self.conn:
-            self.conn.close()
-        st.info("MySQL connection closed")
-
+        self.cursor.execute("DELETE FROM history WHERE id=%s", (record_id,))
+        self.conn.commit()
