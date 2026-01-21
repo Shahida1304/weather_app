@@ -16,7 +16,7 @@ from datetime import datetime, time, timedelta
 import urllib.parse
 
 st.markdown(
-    "<h1 style='text-align: center; color: #2E86C1;'>🌍 Weather & Air Around You</h1>",
+    "<h1 style='text-align: center; color: #2E86C1;'> Weather & Air Around You</h1>",
     unsafe_allow_html=True,
 )
 st.markdown("---")
@@ -170,7 +170,7 @@ if st.button("Search"):
 menu = ["Add Record", "View Records", "Update Record", "Delete Record"]
 choice = st.sidebar.selectbox("Menu", menu)
 
-# ➕ Add Record
+#  Add Record
 if choice == "Add Record":
     st.subheader("Add New Weather Record")
     location = st.text_input("Location")
@@ -189,7 +189,7 @@ if choice == "Add Record":
         )
         st.success("Record added successfully!")
 
-# 📖 View Records
+#  View Records
 elif choice == "View Records":
     st.subheader("Weather History Records")
     records = db.get_records()
@@ -198,7 +198,7 @@ elif choice == "View Records":
     else:
         st.warning("⚠ No records found.")
 
-# ✏️ Update Record
+#  Update Record
 elif choice == "Update Record":
     st.subheader("Update Weather Record")
     records = db.get_records()
@@ -228,7 +228,7 @@ elif choice == "Update Record":
             )
             st.success("Record updated successfully!")
 
-# 🗑️ Delete Record
+#  Delete Record
 elif choice == "Delete Record":
     st.subheader("Delete Weather Record")
     records = db.get_records()
@@ -241,18 +241,4 @@ elif choice == "Delete Record":
         if st.button("Delete Record"):
             db.delete_record(record["id"])
             st.success("Record deleted successfully!")
-# Initialize session state
-if "show_info" not in st.session_state:
-    st.session_state.show_info = False
 
-# Button to toggle sidebar info
-if st.button("Show Info"):
-    st.session_state.show_info = not st.session_state.show_info  # toggle
-
-# Conditionally show sidebar info
-if st.session_state.show_info:
-    st.success("👩‍💻 Name: Shaik Shahida")
-    st.info(
-        """📌 The Product Manager Accelerator Program is a career-growth platform that supports professionals at every stage, from students entering the field to Directors advancing into leadership roles. With structured training, real-world projects, and expert mentorship, the program has helped hundreds of ambitious individuals build strong PM and leadership skills, secure dream jobs, and accelerate their career growth in top organizations.
-        [🔗 Visit LinkedIn Page](https://www.linkedin.com/school/pmaccelerator/)"""
-    )
